@@ -307,7 +307,7 @@ int perturb_init(
   class_alloc(pppw,number_of_threads * sizeof(struct perturb_workspace *),ppt->error_message);
 
   /** - loop over modes (scalar, tensors, etc). For each mode: */
-
+/**JACK NOTE: Here is where the perturbation equations are integrated.**/
   for (index_md = 0; index_md < ppt->md_size; index_md++) {
 
     if (ppt->perturbations_verbose > 1)
@@ -386,7 +386,7 @@ int perturb_init(
 #ifdef _OPENMP
           tstart = omp_get_wtime();
 #endif
-
+/** JACK NOTE: Call perturb solve to do the inregraition. **/
           class_call_parallel(perturb_solve(ppr,
                                             pba,
                                             pth,
@@ -7025,6 +7025,7 @@ int perturb_derivs(double tau,
 
   s2_squared = 1.-3.*pba->K/k2;
 
+  /** JACK NOTE: actual start of equations*/
   /** - for scalar modes: */
   if (_scalars_) {
 
@@ -7072,6 +7073,14 @@ int perturb_derivs(double tau,
       // delta alpha, dimensionless
       delta_alpha_rec= (-0.6166 + 0.6703 * pow((Tb_in_K * 1e-4),0.53)*(-0.6166-0.53))/(1+0.6703*pow((Tb_in_K * 1e-4),0.53)) * delta_temp;
 
+      // R_c, momentum-exchange rate coefficient for DM-baryon interaction
+      F_e = 0.76
+      sigma_0 = 1e-30
+      c_n = 1
+      m_cdm = 10
+      m_H = 1
+      R_c = a * c_n * pvecback[pba->index_bg_rho_b] * sigma_0 / (m_cdm + m_H) * F_e
+
     } // end of perturbed recombination related quantities
 
     /** - --> (c) compute metric-related quantities (depending on gauge; additional gauges can be coded below)
@@ -7116,7 +7125,6 @@ int perturb_derivs(double tau,
     }
 
     /** - --> (e) BEGINNING OF ACTUAL SYSTEM OF EQUATIONS OF EVOLUTION */
-
     /* Note concerning perturbed recombination: $cb2*delta_b$ must be replaced everywhere by $cb2*(delta_b+delta_temp)$. If perturbed recombination is not required, delta_temp is equal to zero. */
 
     /** - ---> photon temperature density */
@@ -7133,6 +7141,7 @@ int perturb_derivs(double tau,
 
     /** - ---> baryon velocity (depends on tight-coupling approximation=tca) */
 
+
     if (ppw->approx[ppw->index_ap_tca] == (int)tca_off) {
 
       /* without tca */
@@ -7142,8 +7151,9 @@ int perturb_derivs(double tau,
         - a_prime_over_a*theta_b
         + metric_euler
         + k2*cb2*(delta_b+delta_temp)
-        + R*pvecthermo[pth->index_th_dkappa]*(theta_g-theta_b);
-
+        + R*pvecthermo[pth->index_th_dkappa]*(theta_g-theta_b)
+        + pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]*R_c*(y[pv->index_pt_theta_cdm]-theta_b);
+        /* JACK NOTE: The baryon velocity has an additional term \rho_c/\rho_b*R_c(\theta_c-\theta_b) if there is DM-baryon scattering */
     }
 
     else {
@@ -7158,7 +7168,8 @@ int perturb_derivs(double tau,
         (-a_prime_over_a*theta_b
          +k2*(cb2*(delta_b+delta_temp)+R*(delta_g/4.-s2_squared*ppw->tca_shear_g))
          +R*ppw->tca_slip)/(1.+R)
-        +metric_euler;
+        +metric_euler
+        + pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]*R_c*(y[pv->index_pt_theta_cdm]-theta_b);
 
     }
 
@@ -7255,7 +7266,7 @@ int perturb_derivs(double tau,
     }
 
     /** - ---> cdm */
-
+/** JACK NOTE CDM COLD DARK MATTER **/
     if (pba->has_cdm == _TRUE_) {
 
       /** - ----> newtonian gauge: cdm density and velocity */
@@ -7266,10 +7277,14 @@ int perturb_derivs(double tau,
         dy[pv->index_pt_theta_cdm] = - a_prime_over_a*y[pv->index_pt_theta_cdm] + metric_euler; /* cdm velocity */
       }
 
-      /** - ----> synchronous gauge: cdm density only (velocity set to zero by definition of the gauge) */
+      /** - ----> synchronous gauge: cdm density only (velocity set to zero by definition of the gauge if there is no baryon-DM scattering) */
 
       if (ppt->gauge == synchronous) {
-        dy[pv->index_pt_delta_cdm] = -metric_continuity; /* cdm density */
+        dy[pv->index_pt_delta_cdm] = -y[pv->index_pt_theta_cdm]-metric_continuity; /* cdm density \dot{\delta}_c=-\theta_c-\dot{h}/2*/
+        dy[pv->index_pt_theta_cdm] = - a_prime_over_a*y[pv->index_pt_theta_cdm] + metric_euler + pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]*R_c*(theta_b - y[pv->index_pt_theta_cdm]); /* cdm velocity */
+        /* JACK NOTE: For DM-baryon interactions. Dm velocity changes. Dvorkin 2014. Neglecting DM sound speed.*/
+      }
+
       }
 
     }

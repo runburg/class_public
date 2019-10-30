@@ -43,7 +43,7 @@ The explanatory.ini file is THE reference input file, containing and
 explaining the use of all possible input parameters. We recommend to
 read it, to keep it unchanged (for future reference), and to create
 for your own purposes some shorter input files, containing only the
-input lines which are useful for you. Input files must have a *.ini
+input lines which are useful for you. Input files must have a \*.ini
 extension.
 
 If you want to play with the precision/speed of the code, you can use
@@ -52,10 +52,10 @@ one of them, and run with two input files, for instance:
 
     ./class test.ini cl_permille.pre
 
-The files *.pre are suppposed to specify the precision parameters for
+The files \*.pre are suppposed to specify the precision parameters for
 which you don't want to keep default values. If you find it more
-convenient, you can pass these precision parameter values in your *.ini
-file instead of an additional *.pre file.
+convenient, you can pass these precision parameter values in your \*.ini
+file instead of an additional \*.pre file.
 
 The automatically-generated documentation is located in
 

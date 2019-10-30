@@ -3,7 +3,6 @@ output/
 build/
 class
 *.prof
-*.ini
 libclass.a
 *out
 python/classy.c
@@ -11,3 +10,4 @@ python/classy.c
 python/build/
 RealSpaceInterface/cache/
 .DS_Store
+python/faulty_figs

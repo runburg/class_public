@@ -1,0 +1,356 @@
+/** @file perturbations.c Documented perturbation module
+/**
+  /** Summary: */
+  /** - interpolate in pre-computed table contained in ppt */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - perform preliminary checks */
+  /** - initialize all indices and lists in perturbs structure using perturb_indices_of_perturbs() */
+  /** - define the common time sampling for all sources using
+  /** - if we want to store perturbations, write titles and allocate storage */
+  /** - create an array of workspaces in multi-thread case */
+  /** - loop over modes (scalar, tensors, etc). For each mode: */
+/**JACK NOTE: Here is where the perturbation equations are integrated.**/
+      /** - --> (a) create a workspace (one per thread in multi-thread case) */
+      /** - --> (b) initialize indices of vectors of perturbations with perturb_indices_of_current_vectors() */
+    /** - --> (c) loop over initial conditions and wavenumbers; for each of them, evolve perturbations and compute source functions with perturb_solve() */
+/** JACK NOTE: Call perturb solve to do the inregraition. **/
+/**
+    /** Stuff related to perturbations output: */
+    /** - Free non-NULL pointers */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - count modes (scalar, vector, tensor) and assign corresponding indices */
+  /** - allocate array of number of types for each mode, ppt->tp_size[index_md] */
+  /** - allocate array of number of initial conditions for each mode, ppt->ic_size[index_md] */
+  /** - allocate array of arrays of source functions for each mode, ppt->source[index_md] */
+  /** - initialization of all flags to false (will eventually be set to true later) */
+  /** - source flags and indices, for sources that all modes have in
+  /** - define k values with perturb_get_k_list() */
+  /** - loop over modes. Initialize flags and indices which are specific to each mode. */
+    /** - (a) scalars */
+      /** - --> source flags and indices, for sources that are specific to scalars */
+      /** - --> count scalar initial conditions (for scalars: ad, cdi, nid, niv; for tensors: only one) and assign corresponding indices */
+    /** - (b) vectors */
+      /** - --> source flags and indices, for sources that are specific to vectors */
+      /** - --> initial conditions for vectors*/
+    /** - (c) tensors */
+      /** - --> source flags and indices, for sources that are specific to tensors */
+      /** - --> only one initial condition for tensors*/
+    /** - (d) for each mode, allocate array of arrays of source functions for each initial conditions and wavenumber, (ppt->source[index_md])[index_ic][index_type] */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - allocate background/thermodynamics vectors */
+  /** - first, just count the number of sampling points in order to allocate the array containing all values */
+  /** - (a) if CMB requested, first sampling point = when the universe
+  /** - (b) next sampling point = previous + ppr->perturb_sampling_stepsize * timescale_source, where:
+  /** - --> infer total number of time steps, ppt->tau_size */
+  /** - --> allocate array of time steps, ppt->tau_sampling[index_tau] */
+  /** - --> repeat the same steps, now filling the array with each tau value: */
+  /** - --> (b.1.) first sampling point = when the universe stops being opaque */
+  /** - --> (b.2.) next sampling point = previous + ppr->perturb_sampling_stepsize * timescale_source, where
+  /** - last sampling point = exactly today */
+  /** - loop over modes, initial conditions and types. For each of
+/**
+  /** Summary: */
+  /** - allocate arrays related to k list for each mode */
+  /** - scalar modes */
+    /** - --> find k_max (as well as k_max_cmb[ppt->index_md_scalars], k_max_cl[ppt->index_md_scalars]) */
+    /** - --> test that result for k_min, k_max make sense */
+  /** - vector modes */
+    /** - --> find k_max (as well as k_max_cmb[ppt->index_md_vectors], k_max_cl[ppt->index_md_vectors]) */
+    /** - --> test that result for k_min, k_max make sense */
+  /** - tensor modes */
+    /** - --> find k_max (as well as k_max_cmb[ppt->index_md_tensors], k_max_cl[ppt->index_md_tensors]) */
+    /** - --> test that result for k_min, k_max make sense */
+  /** - If user asked for k_output_values, add those to all k lists: */
+    /** - --> Find indices in ppt->k[index_md] corresponding to 'k_output_values'.
+        /** - --> Decide if we should add k_output_value now. This has to be this complicated, since we
+      /** - --> The two MIN statements are here because in a normal run, the cl and cmb
+  /** - finally, find the global k_min and k_max for the ensemble of all modes 9scalars, vectors, tensors) */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - Compute maximum l_max for any multipole */;
+  /** - Allocate \f$ s_l\f$[ ] array for freestreaming of multipoles (see arXiv:1305.3261) and initialize
+  /** - define indices of metric perturbations obeying constraint
+  /** - allocate some workspace in which we will store temporarily the
+  /** - count number of approximations, initialize their indices, and allocate their flags */
+  /** - For definiteness, initialize approximation flags to arbitrary
+  /** - allocate fields where some of the perturbations are stored */
+/**
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - initialize indices relevant for back/thermo tables search */
+  /** - get wavenumber value */
+  /** - If non-zero curvature, update array of free-streaming coefficients ppw->s_l */
+  /** - maximum value of tau for which sources are calculated for this wavenumber */
+  /** - using bisection, compute minimum value of tau for which this
+  /** - find the number of intervals over which approximation scheme is constant */
+  /** - fill the structure containing all fixed parameters, indices
+  /** - check whether we need to print perturbations to a file for this wavenumber */
+  /** - loop over intervals over which approximation scheme is uniform. For each interval: */
+    /** - --> (a) fix the approximation scheme */
+    /** - --> (b) get the previous approximation scheme. If the current
+    /** - --> (c) define the vector of perturbations to be integrated
+    /** - --> (d) integrate the perturbations over the current interval. */
+  /** - if perturbations were printed in a file, close the file */
+  /** - fill the source terms array with zeros for all times between
+  /** - free quantities allocated at the beginning of the routine */
+    /** Write titles for all perturbations that we would like to print/store. */
+/**
+  /** Summary: */
+  /** - fix default number of intervals to one (if no approximation switch) */
+  /** - loop over each approximation and add the number of approximation switching times */
+/**
+  /** Summary: */
+  /** - write in output arrays the initial time and approximation */
+  /** - if there are no approximation switches, just write final time and return */
+  /** - if there are switches, consider approximations one after each
+    /** - now sort interval limits in correct order */
+    /** - store each approximation in chronological order */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - allocate a new perturb_vector structure to which ppw-->pv will point at the end of the routine */
+  /** - initialize pointers to NULL (they will be allocated later if
+  /** - define all indices in this new vector (depends on approximation scheme, described by the input structure ppw-->pa) */
+    /** - (a) metric perturbations V or \f$ h_v \f$ depending on gauge */
+    /** - (b) metric perturbation h is a propagating degree of freedom, so h and hdot are included
+  /** - allocate vectors for storing the values of all these
+  /** - specify which perturbations are needed in the evaluation of source terms */
+  /** - case of setting initial conditions for a new wavenumber */
+      /** - --> (a) check that current approximation scheme is consistent
+    /** - --> (b) let ppw-->pv points towards the perturb_vector structure
+    /** - --> (c) fill the vector ppw-->pv-->y with appropriate initial conditions */
+  /** - case of switching approximation while a wavenumber is being integrated */
+    /** - --> (a) for the scalar mode: */
+      /** - ---> (a.1.) check that the change of approximation scheme makes
+      /** - ---> (a.2.) some variables (b, cdm, fld, ...) are not affected by
+    /** - --> (b) for the vector mode */
+      /** - ---> (b.1.) check that the change of approximation scheme makes
+      /** - ---> (b.2.) some variables (gw, gwdot, ...) are not affected by
+    /** - --> (c) for the tensor mode */
+      /** - ---> (c.1.) check that the change of approximation scheme makes
+      /** - ---> (c.2.) some variables (gw, gwdot, ...) are not affected by
+    /** - --> (d) free the previous vector of perturbations */
+    /** - --> (e) let ppw-->pv points towards the perturb_vector structure
+/**
+/**
+  /** Summary: */
+  /** --> Declare local variables */
+  /** --> For scalars */
+    /** - (a) compute relevant background quantities: compute rho_r,
+    /** - (b) starts by setting everything in synchronous gauge. If
+    /** - --> (b.1.) adiabatic */
+        /** - ---> Canonical field (solving for the perturbations):
+    /** - --> (b.2.) Cold dark matter Isocurvature */
+    /** - --> (b.3.) Baryon Isocurvature */
+    /** - --> (b.4.) Neutrino density Isocurvature */
+    /** - --> (b.5.) Neutrino velocity Isocurvature */
+    /** - (c) If the needed gauge is really the synchronous gauge, we need to affect the previously computed value of eta to the actual variable eta */
+    /** - (d) If the needed gauge is the newtonian gauge, we must compute alpha and then perform a gauge transformation for each variable */
+      /** - (e) In any gauge, we should now implement the relativistic initial conditions in ur and ncdm variables */
+  /** --> For tensors */
+    /** tensor initial conditions take into account the fact that
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - compute Fourier mode time scale = \f$ \tau_k = 1/k \f$ */
+  /** - evaluate background quantities with background_at_tau() and
+  /** - for scalar modes: */
+    /** - --> (a) evaluate thermodynamical quantities with thermodynamics_at_z() */
+    /** - ---> (b.1.) if \f$ \kappa'=0 \f$, recombination is finished; tight-coupling approximation must be off */
+    /** - ---> (b.2.) if \f$ \kappa' \neq 0 \f$, recombination is not finished: check tight-coupling approximation */
+      /** - ----> (b.2.a) compute recombination time scale for photons, \f$ \tau_{\gamma} = 1/ \kappa' \f$ */
+      /** - ----> (b.2.b) check whether tight-coupling approximation should be on */
+    /** - --> (c) free-streaming approximations */
+  /** - for tensor modes: */
+    /** - --> (a) evaluate thermodynamical quantities with thermodynamics_at_z() */
+    /** - ---> (b.1.) if \f$ \kappa'=0 \f$, recombination is finished; tight-coupling approximation must be off */
+    /** - ---> (b.2.) if \f$ \kappa' \neq 0 \f$, recombination is not finished: check tight-coupling approximation */
+      /** - ----> (b.2.a) compute recombination time scale for photons, \f$ \tau_{\gamma} = 1/ \kappa' \f$ */
+      /** - ----> (b.2.b) check whether tight-coupling approximation should be on */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - extract the fields of the parameter_and_workspace input structure */
+  /** - compute Fourier mode time scale = \f$ \tau_k = 1/k \f$ */
+  /** - evaluate background quantities with background_at_tau() and
+  /** - for scalars modes: */
+        /** - -->  compute recombination time scale for photons, \f$ \tau_{\gamma} = 1/ \kappa' \f$ */
+  /** - for vector modes: */
+        /** - -->  compute recombination time scale for photons, \f$ \tau_{\gamma} = 1/ \kappa' \f$ */
+  /** - for tensor modes: */
+        /** - --> compute recombination time scale for photons, \f$ \tau_{\gamma} = 1/ \kappa' \f$ */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - define wavenumber and scale factor related quantities */
+  /** - sum up perturbations from all species */
+  /** - for scalar modes: */
+    /** - --> infer metric perturbations from Einstein equations */
+  /** - for vector modes */
+  /** - for tensor modes */
+  /** Summary: */
+  /** - define local variables */
+  /** - wavenumber and scale factor related quantities */
+  /** - for scalar modes */
+    /** - --> (a) deal with approximation schemes */
+    /** - ---> (a.1.) photons */
+        /** - ----> (a.1.1.) no approximation */
+        /** - ----> (a.1.2.) radiation streaming approximation */
+      /** - ----> (a.1.3.) tight coupling approximation */
+    /** - ---> (a.2.) ur */
+    /** - --> (b) compute the total density, velocity and shear perturbations */
+  /** - for vector modes */
+    /** - --> photon contribution to vector sources: */
+    /** - --> baryons */
+  /** - for tensor modes */
+    /** - --> photon contribution to gravitational wave source: */
+    /** - --> ur contribution to gravitational wave source: */
+    /** - --> ncdm contribution to gravitational wave source: */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - rename structure fields (just to avoid heavy notations) */
+  /** - get background/thermo quantities in this point */
+  /** - for scalars */
+    /** - --> compute metric perturbations */
+    /** - --> compute quantities depending on approximation schemes */
+    /** - --> for each type, compute source terms */
+  /** - for tensors */
+    /** - --> compute quantities depending on approximation schemes */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - ncdm sector begins */
+  /** - ncdm sector ends */
+  /** - rename structure fields (just to avoid heavy notations) */
+  /** - update background/thermo quantities in this point */
+  /** - update metric perturbations in this point */
+  /** - calculate perturbed recombination */
+  /** - for scalar modes */
+      /** - --> Get delta, deltaP/rho, theta, shear and store in array */
+          /** - --> Do gauge transformation of delta, deltaP/rho (?) and theta using -= 3aH(1+w_ncdm) alpha for delta. */
+    /** - --> Handle (re-)allocation */
+  /** - for tensor modes: */
+    /** - --> Handle (re-)allocation */
+/**
+  /** Summary: */
+  /** - define local variables */
+  /** - rename the fields of the input structure (just to avoid heavy notations) */
+  /** - get background/thermo quantities in this point */
+  /** - get metric perturbations with perturb_einstein() */
+  /** - compute related background quantities */
+  /** - Compute 'generalised cotK function of argument \f$ \sqrt{|K|}*\tau \f$, for closing hierarchy.
+  /** JACK NOTE: actual start of equations*/
+  /** - for scalar modes: */
+    /** - --> (a) define short-cut notations for the scalar perturbations */
+    /** - --> (b) perturbed recombination **/
+    /** - --> (c) compute metric-related quantities (depending on gauge; additional gauges can be coded below)
+    /** - --> (d) if some approximation schemes are turned on, enforce a few y[] values computed in perturb_einstein */
+    /** - --> (e) BEGINNING OF ACTUAL SYSTEM OF EQUATIONS OF EVOLUTION */
+    /** - ---> photon temperature density */
+    /** - ---> baryon density */
+    /** - ---> baryon velocity (depends on tight-coupling approximation=tca) */
+      /** - ----> perturbed recombination has an impact **/
+    /** - ---> photon temperature higher momenta and photon polarization (depend on tight-coupling approximation) */
+      /** - ----> if photon tight-coupling is off */
+        /** - -----> define \f$ \Pi = G_{\gamma 0} + G_{\gamma 2} + F_{\gamma 2} \f$ */
+        /** - -----> photon temperature velocity */
+        /** - -----> photon temperature shear */
+        /** - -----> photon temperature l=3 */
+        /** - -----> photon temperature l>3 */
+        /** - -----> photon temperature lmax */
+        /** - -----> photon polarization l=0 */
+        /** - -----> photon polarization l=1 */
+        /** - -----> photon polarization l=2 */
+        /** - -----> photon polarization l>2 */
+        /** - -----> photon polarization lmax_pol */
+      /** - ----> if photon tight-coupling is on: */
+        /** - -----> in that case, only need photon velocity */
+    /** - ---> cdm */
+      /** - ----> newtonian gauge: cdm density and velocity */
+      /** - ----> synchronous gauge: cdm density only (velocity set to zero by definition of the gauge) */
+    /** - ---> dcdm and dr */
+      /** - ----> dcdm */
+    /** - ---> dr */
+      /** - ----> dr F0 */
+      /** - ----> dr F1 */
+      /** - ----> exact dr F2 */
+      /** - ----> exact dr l=3 */
+      /** - ----> exact dr l>3 */
+      /** - ----> exact dr lmax_dr */
+    /** - ---> fluid (fld) */
+        /** - ----> factors w, w_prime, adiabatic sound speed ca2 (all three background-related),
+        /** - ----> fluid density */
+        /** - ----> fluid velocity */
+    /** - ---> scalar field (scf) */
+      /** - ----> field value */
+      /** - ----> Klein Gordon equation */
+    /** - ---> ultra-relativistic neutrino/relics (ur) */
+      /** - ----> if radiation streaming approximation is off */
+        /** - -----> ur density */
+        /** - -----> ur velocity */
+          /** - -----> exact ur shear */
+          /** - -----> exact ur l=3 */
+          /** - -----> exact ur l>3 */
+          /** - -----> exact ur lmax_ur */
+          /** - -----> in fluid approximation (ufa): only ur shear needed */
+    /** - ---> non-cold dark matter (ncdm): massive neutrinos, WDM, etc. */
+      /** - ----> first case: use a fluid approximation (ncdmfa) */
+        /** - -----> loop over species */
+          /** - -----> define intermediate quantitites */
+          /** - -----> exact continuity equation */
+          /** - -----> exact euler equation */
+          /** - -----> different ansatz for approximate shear derivative */
+          /** - -----> jump to next species */
+      /** - ----> second case: use exact equation (Boltzmann hierarchy on momentum grid) */
+        /** - -----> loop over species */
+          /** - -----> loop over momentum */
+            /** - -----> define intermediate quantities */
+            /** - -----> ncdm density for given momentum bin */
+            /** - -----> ncdm velocity for given momentum bin */
+            /** - -----> ncdm shear for given momentum bin */
+            /** - -----> ncdm l>3 for given momentum bin */
+            /** - -----> ncdm lmax for given momentum bin (truncation as in Ma and Bertschinger)
+            /** - -----> jump to next momentum bin or species */
+    /** - ---> metric */
+    /** - ---> eta of synchronous gauge */
+  /** - vector mode */
+    /** - --> baryon velocity */
+  /** - tensor modes: */
+    /** - --> non-cold dark matter (ncdm): massive neutrinos, WDM, etc. */
+      /** - ---> loop over species */
+        /** - ----> loop over momentum */
+          /** - ----> define intermediate quantities */
+          /** - ----> ncdm density for given momentum bin */
+          /** - ----> ncdm l>0 for given momentum bin */
+          /** - ----> ncdm lmax for given momentum bin (truncation as in Ma and Bertschinger)
+          /** - ----> jump to next momentum bin or species */
+    /** - --> tensor metric perturbation h (gravitational waves) */
+    /** - --> its time-derivative */
+  /** Summary: */
+  /** - define local variables */
+  /** - rename the fields of the input structure (just to avoid heavy notations) */
+  /** - compute related background quantities */
+  /** - --> (a) define short-cut notations for the scalar perturbations */
+  /** - --> (b) define short-cut notations used only in tight-coupling approximation */
+  /** - --> (c) compute metric-related quantities (depending on gauge; additional gauges can be coded below)
+  /** - --> (d) if some approximation schemes are turned on, enforce a few y[ ] values computed in perturb_einstein */
+  /** - ---> like Ma & Bertschinger */
+  /** - ---> relax assumption dkappa~a\f$^{-2}\f$ (like in CAMB) */
+  /** - ---> also relax assumption cb2~a\f$^{-1}\f$ */
+  /** - ---> intermediate quantities for 2nd order tca: shear_g at first order in tight-coupling */
+  /** - ---> intermediate quantities for 2nd order tca: zero order for theta_b' = theta_g' */
+  /** - ----> perturbed recombination has an impact **/
+  /** - ---> intermediate quantities for 2nd order tca: shear_g_prime at first order in tight-coupling */
+  /** - ---> 2nd order as in CRS*/
+  /** - ---> 2nd order like in CLASS paper */
+  /** - ---> add only the most important 2nd order terms */
+  /** - ---> store tight-coupling values of photon shear and its derivative */

@@ -10,7 +10,7 @@ To run the test suite, type
 nosetests test_class.py
 If you want to extract the problematic input parameters at a later stage,
 you should type
-nosetests test_class.py 1>stdoutfile 2>stderrfile
+nose2 test_class.py 1>stdoutfile 2>stderrfile
 and then use the python script extract_errors.py on the stderrfile.
 
 When adding a new input parameter to CLASS (by modifying input.c), you
@@ -79,7 +79,7 @@ import numpy as np
 from math import log10
 import matplotlib.pyplot as plt
 import unittest
-from nose_parameterized import parameterized
+from parameterized import parameterized
 
 # To avoid testing for differences between synchronous and Newtonian gauge, set
 # this flag to False

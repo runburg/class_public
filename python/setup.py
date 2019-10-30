@@ -9,16 +9,18 @@ import os.path as osp
 
 # Recover the gcc compiler
 GCCPATH_STRING = sbp.Popen(
-    ['gcc', '-print-libgcc-file-name'],
+    ['gcc-9', '-print-libgcc-file-name'],
     stdout=sbp.PIPE).communicate()[0]
 GCCPATH = osp.normpath(osp.dirname(GCCPATH_STRING)).decode()
 
+os.environ["CC"] = "gcc-9"
+
 liblist = ["class"]
 MVEC_STRING = sbp.Popen(
-    ['gcc', '-lmvec'],
+    ['gcc-9', '-lmvec'],
     stderr=sbp.PIPE).communicate()[1]
 if b"mvec" not in MVEC_STRING:
-    liblist += ["mvec","m"]
+    liblist += ["mvec", "m"]
 
 # define absolute paths
 root_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
