@@ -750,12 +750,27 @@ int input_read_parameters(
              errmsg,
              errmsg);
   class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
-             errmsg,
+           errmsg,
              "In input file, you can only enter one of Omega_cdm or omega_cdm, choose one");
   if (flag1 == _TRUE_)
     pba->Omega0_cdm = param1;
   if (flag2 == _TRUE_)
     pba->Omega0_cdm = param2/pba->h/pba->h;
+
+  /* JACK NOTE NECESSARY ADDITIONS FOR DM-BARYON SCATTERING */
+  // n, velocity dependence of DM-baryon cross-section
+  class_read_double("vel_dep_n", pba->vel_dep_n)
+  // c_n, constant for given annihilation schemes
+  class_read_double("c_n", pba->c_n)
+  // F_e, Helium scattering correction factor
+  class_read_double("F_e", pba->F_e)
+  // sigma_0, velocity-independent cross-section of DM-baryon scattering
+  class_read_double("sigma_0", pba->sigma_0)
+  // m_cdm, mass of cold dark matter particle
+  class_read_double("m_cdm", pba->m_cdm)
+  // m_H, mass of Hydrogen
+  class_read_double("m_H", pba->m_H)
+
 
   Omega_tot += pba->Omega0_cdm;
 
