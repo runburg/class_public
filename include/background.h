@@ -53,6 +53,15 @@ struct background
 
   double Omega0_cdm; /**< \f$ \Omega_{0 cdm} \f$: cold dark matter */
 
+  /* For DM-baryon scattering */
+  double vel_dep_n; /**< \f$ n \f$: velocity dependence of scattering */
+  double c_n; /**< \f$ c_n \f$: coeffiecient for velocity depedence */
+  double F_e; /**< \f$ F_{He} \f$: correction for helium */
+  double sigma_0; /**< \f$ \simga_0 \f$: vel-independent cross-section */
+  double m_cdm; /**< \f$ m_{CDM} \f$: mass of CDM particle */
+  double m_H; /**< \f$ m_H \f$: mass of hydrogen */
+
+
   double Omega0_lambda; /**< \f$ \Omega_{0_\Lambda} \f$: cosmological constant */
 
   double Omega0_fld; /**< \f$ \Omega_{0 de} \f$: fluid */

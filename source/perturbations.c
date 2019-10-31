@@ -7073,13 +7073,15 @@ int perturb_derivs(double tau,
       // delta alpha, dimensionless
       delta_alpha_rec= (-0.6166 + 0.6703 * pow((Tb_in_K * 1e-4),0.53)*(-0.6166-0.53))/(1+0.6703*pow((Tb_in_K * 1e-4),0.53)) * delta_temp;
 
+      // JACK NOTE ADDING PARAMETERS
       // R_c, momentum-exchange rate coefficient for DM-baryon interaction
-      F_e = 0.76
-      sigma_0 = 1e-30
-      c_n = 1
-      m_cdm = 10
-      m_H = 1
-      R_c = a * c_n * pvecback[pba->index_bg_rho_b] * sigma_0 / (m_cdm + m_H) * F_e
+      F_e = pba->F_e
+      sigma_0 = pba->sigma_0
+      c_n = pba->c_n
+      m_cdm = pba->m_cdm
+      m_H = pba->m_H
+      n = pba->vel_dep_n
+      R_c = a * c_n * pvecback[pba->index_bg_rho_b] * sigma_0 * pow((Tb_in_K / m_cdm + Tb_in_K / m_H), ((n+1)/2)) * F_e 
 
     } // end of perturbed recombination related quantities
 
