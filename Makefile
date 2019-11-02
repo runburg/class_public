@@ -73,7 +73,7 @@ EXTERNAL += hyrectools.o helium.o hydrogen.o history.o
 endif
 
 %.o:  %.c .base
-	cd $(WRKDIR);$(CC) $(OPTFLAG) $(OMPFLAG) $(CCFLAG) $(INCLUDES) -c ../$< -o $*.o
+	cd $(WRKDIR);$(CC) $(OPTFLAG) $(OMPFLAG) $(CCFLAG) $(INCLUDES) -c -g ../$< -o $*.o
 
 TOOLS = growTable.o dei_rkck.o sparse.o evolver_rkck.o  evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o
 

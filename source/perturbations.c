@@ -295,7 +295,6 @@ int perturb_init(
 
 
   /** - create an array of workspaces in multi-thread case */
-
 #ifdef _OPENMP
 
 #pragma omp parallel
@@ -446,6 +445,7 @@ int perturb_init(
   free(pppw);
 
   return _SUCCESS_;
+
 }
 
 /**
@@ -517,7 +517,6 @@ int perturb_free(
     }
 
   }
-
   return _SUCCESS_;
 
 }
@@ -864,7 +863,6 @@ int perturb_indices_of_perturbs(
                 ppt->error_message);
 
   }
-
   return _SUCCESS_;
 
 }
@@ -1859,7 +1857,6 @@ int perturb_get_k_list(
 
   free(k_max_cmb);
   free(k_max_cl);
-
   return _SUCCESS_;
 
 }
@@ -2072,7 +2069,6 @@ int perturb_workspace_free (
   }
 
   free(ppw);
-
   return _SUCCESS_;
 }
 
@@ -2304,7 +2300,6 @@ int perturb_solve(
       tau_upper = tau_mid;
 
     tau_mid = 0.5*(tau_lower + tau_upper);
-
   }
 
   tau = tau_mid;
@@ -3093,7 +3088,7 @@ int perturb_vector_init(
     /* cdm */
 
     class_define_index(ppv->index_pt_delta_cdm,pba->has_cdm,index_pt,1); /* cdm density */
-    class_define_index(ppv->index_pt_theta_cdm,pba->has_cdm && (ppt->gauge == newtonian),index_pt,1); /* cdm velocity */
+    class_define_index(ppv->index_pt_theta_cdm,pba->has_cdm,index_pt,1); /* cdm velocity */
 
     /* dcdm */
 
@@ -3493,10 +3488,8 @@ int perturb_vector_init(
         ppv->y[ppv->index_pt_delta_cdm] =
           ppw->pv->y[ppw->pv->index_pt_delta_cdm];
 
-        if (ppt->gauge == newtonian) {
-          ppv->y[ppv->index_pt_theta_cdm] =
+        ppv->y[ppv->index_pt_theta_cdm] =
             ppw->pv->y[ppw->pv->index_pt_theta_cdm];
-        }
       }
 
       if (pba->has_dcdm == _TRUE_) {
@@ -6930,6 +6923,8 @@ int perturb_derivs(double tau,
   double alpha_rec=0.,delta_alpha_rec=0.;
   double a_rad=0., Compton_CR =0.;
   double Tb_in_K=0.;
+  double n=0., c_n=0.,F_e=0.,sigma_0=0.,m_cdm=0.,m_H=0.,rho_b=0.;
+  double R_c=0.;
 
 
   /* Non-metric source terms for photons, i.e. \mathcal{P}^{(m)} from arXiv:1305.3261  */
@@ -7072,16 +7067,6 @@ int perturb_derivs(double tau,
 
       // delta alpha, dimensionless
       delta_alpha_rec= (-0.6166 + 0.6703 * pow((Tb_in_K * 1e-4),0.53)*(-0.6166-0.53))/(1+0.6703*pow((Tb_in_K * 1e-4),0.53)) * delta_temp;
-
-      // JACK NOTE ADDING PARAMETERS
-      // R_c, momentum-exchange rate coefficient for DM-baryon interaction
-      F_e = pba->F_e
-      sigma_0 = pba->sigma_0
-      c_n = pba->c_n
-      m_cdm = pba->m_cdm
-      m_H = pba->m_H
-      n = pba->vel_dep_n
-      R_c = a * c_n * pvecback[pba->index_bg_rho_b] * sigma_0 * pow((Tb_in_K / m_cdm + Tb_in_K / m_H), ((n+1)/2)) * F_e 
 
     } // end of perturbed recombination related quantities
 
@@ -7271,6 +7256,19 @@ int perturb_derivs(double tau,
 /** JACK NOTE CDM COLD DARK MATTER **/
     if (pba->has_cdm == _TRUE_) {
 
+      // JACK NOTE ADDING PARAMETERS
+      // R_c, momentum-exchange rate coefficient for DM-baryon interaction
+      // Temperature is already in Kelvin
+      Tb_in_K = pvecthermo[pth->index_th_Tb];
+      rho_b = pvecback[pba->index_bg_rho_b];
+      F_e = pba->F_e;
+      sigma_0 = pba->sigma_0;
+      c_n = pba->c_n;
+      m_cdm = pba->m_cdm;
+      m_H = pba->m_H;
+      n = pba->vel_dep_n;
+      R_c = a * c_n * rho_b * sigma_0 / (m_cdm + m_H) * pow((Tb_in_K / m_cdm + Tb_in_K / m_H), ((n+1)/2)) * F_e ;
+
       /** - ----> newtonian gauge: cdm density and velocity */
 
       if (ppt->gauge == newtonian) {
@@ -7286,9 +7284,6 @@ int perturb_derivs(double tau,
         dy[pv->index_pt_theta_cdm] = - a_prime_over_a*y[pv->index_pt_theta_cdm] + metric_euler + pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]*R_c*(theta_b - y[pv->index_pt_theta_cdm]); /* cdm velocity */
         /* JACK NOTE: For DM-baryon interactions. Dm velocity changes. Dvorkin 2014. Neglecting DM sound speed.*/
       }
-
-      }
-
     }
 
     /* perturbed recombination */
