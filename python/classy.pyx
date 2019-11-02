@@ -1721,6 +1721,18 @@ cdef class Class:
                 value = self.sp.sigma8
             elif name == 'sigma8_cb':
                 value = self.sp.sigma8_cb
+            elif name == 'vel_dep_n':
+                value = self.ba.vel_dep_n
+            elif name == 'c_n':
+                value = self.ba.c_n
+            elif name == 'F_e':
+                value = self.ba.F_e
+            elif name == 'sigma_0':
+                value = self.ba.sigma_0
+            elif name == 'm_cdm':
+                value = self.ba.m_cdm
+            elif name == 'm_H':
+                value = self.ba.m_H
             else:
                 raise CosmoSevereError("%s was not recognized as a derived parameter" % name)
             derived[name] = value
