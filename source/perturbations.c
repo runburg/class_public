@@ -7128,6 +7128,21 @@ int perturb_derivs(double tau,
 
     /** - ---> baryon velocity (depends on tight-coupling approximation=tca) */
 
+    // JACK NOTE ADDING PARAMETERS
+    // R_c, momentum-exchange rate coefficient for DM-baryon interaction
+    // Temperature is already in Kelvin
+    Tb_in_K = pvecthermo[pth->index_th_Tb];
+    rho_b = pvecback[pba->index_bg_rho_b];
+    F_e = pba->F_e;
+    sigma_0 = pba->sigma_0;
+    c_n = pba->c_n;
+    m_cdm = pba->m_cdm;
+    m_H = _m_H_ * 3e8 * 3e8 // hydrogen mass in J
+    n = pba->vel_dep_n;
+    // R_c = a * c_n * rho_b * sigma_0 / (m_cdm + m_H) * pow((Tb_in_K / m_cdm + Tb_in_K / m_H), ((n+1)/2)) * F_e ;
+    // Factor of 1/c needed for units
+    R_c = a * c_n * rho_b * sigma_0 / (3e8 * m_H) * pow(Tb_in_K * _k_B_/m_H, (n+1)/2) * F_e ;
+
 
     if (ppw->approx[ppw->index_ap_tca] == (int)tca_off) {
 
@@ -7256,19 +7271,6 @@ int perturb_derivs(double tau,
 /** JACK NOTE CDM COLD DARK MATTER **/
     if (pba->has_cdm == _TRUE_) {
 
-      // JACK NOTE ADDING PARAMETERS
-      // R_c, momentum-exchange rate coefficient for DM-baryon interaction
-      // Temperature is already in Kelvin
-      Tb_in_K = pvecthermo[pth->index_th_Tb];
-      rho_b = pvecback[pba->index_bg_rho_b];
-      F_e = pba->F_e;
-      sigma_0 = pba->sigma_0;
-      c_n = pba->c_n;
-      m_cdm = pba->m_cdm;
-      m_H = pba->m_H;
-      n = pba->vel_dep_n;
-      R_c = a * c_n * rho_b * sigma_0 / (m_cdm + m_H) * pow((Tb_in_K / m_cdm + Tb_in_K / m_H), ((n+1)/2)) * F_e ;
-
       /** - ----> newtonian gauge: cdm density and velocity */
 
       if (ppt->gauge == newtonian) {
@@ -7282,7 +7284,7 @@ int perturb_derivs(double tau,
       if (ppt->gauge == synchronous) {
         dy[pv->index_pt_delta_cdm] = -y[pv->index_pt_theta_cdm]-metric_continuity; /* cdm density \dot{\delta}_c=-\theta_c-\dot{h}/2*/
         dy[pv->index_pt_theta_cdm] = - a_prime_over_a*y[pv->index_pt_theta_cdm] + metric_euler + pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]*R_c*(theta_b - y[pv->index_pt_theta_cdm]); /* cdm velocity */
-        /* JACK NOTE: For DM-baryon interactions. Dm velocity changes. Dvorkin 2014. Neglecting DM sound speed.*/
+        /* JACK NOTE: For DM-baryon interactions. Dm velocity changes. Dvorkin 2014. Neglecting DM sound speed. R_c defined above baryon evolution equations. */
       }
     }
 
