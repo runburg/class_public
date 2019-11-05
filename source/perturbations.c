@@ -7137,7 +7137,7 @@ int perturb_derivs(double tau,
     sigma_0 = pba->sigma_0;
     c_n = pba->c_n;
     m_cdm = pba->m_cdm;
-    m_H = _m_H_ * 3e8 * 3e8 // hydrogen mass in J
+    m_H = _m_H_ * 3e8 * 3e8; // hydrogen mass in J
     n = pba->vel_dep_n;
     // R_c = a * c_n * rho_b * sigma_0 / (m_cdm + m_H) * pow((Tb_in_K / m_cdm + Tb_in_K / m_H), ((n+1)/2)) * F_e ;
     // Factor of 1/c needed for units
