@@ -7139,9 +7139,12 @@ int perturb_derivs(double tau,
     m_cdm = pba->m_cdm;
     m_H = _m_H_ * 3e8 * 3e8; // hydrogen mass in J
     n = pba->vel_dep_n;
+    // printf("%f", n);
     // R_c = a * c_n * rho_b * sigma_0 / (m_cdm + m_H) * pow((Tb_in_K / m_cdm + Tb_in_K / m_H), ((n+1)/2)) * F_e ;
     // Factor of 1/c needed for units
-    R_c = a * c_n * rho_b * sigma_0 / (3e8 * m_H) * pow(Tb_in_K * _k_B_/m_H, (n+1)/2) * F_e ;
+    // rho is in units of J/m^3 or kg/m/s^2
+    // R_c in units of 1/s
+    R_c = a * c_n * rho_b * sigma_0 / (3e8 * m_cdm) * pow(Tb_in_K * _k_B_/m_H, (n+1)/2) * F_e ;
 
 
     if (ppw->approx[ppw->index_ap_tca] == (int)tca_off) {
@@ -7283,7 +7286,7 @@ int perturb_derivs(double tau,
 
       if (ppt->gauge == synchronous) {
         dy[pv->index_pt_delta_cdm] = -y[pv->index_pt_theta_cdm]-metric_continuity; /* cdm density \dot{\delta}_c=-\theta_c-\dot{h}/2*/
-        dy[pv->index_pt_theta_cdm] = - a_prime_over_a*y[pv->index_pt_theta_cdm] + metric_euler + pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]*R_c*(theta_b - y[pv->index_pt_theta_cdm]); /* cdm velocity */
+        dy[pv->index_pt_theta_cdm] = - a_prime_over_a*y[pv->index_pt_theta_cdm] + metric_euler + R_c*(theta_b - y[pv->index_pt_theta_cdm]); /* cdm velocity */
         /* JACK NOTE: For DM-baryon interactions. Dm velocity changes. Dvorkin 2014. Neglecting DM sound speed. R_c defined above baryon evolution equations. */
       }
     }

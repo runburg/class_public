@@ -559,7 +559,7 @@ extern "C" {
 #define _eV_ 1.602176487e-19        /**< 1 eV expressed in J */
 
 /* parameters entering in Stefan-Boltzmann constant sigma_B */
-#define _k_B_ 1.3806504e-23
+#define _k_B_ 1.3806504e-23 /**< in J/K */
 #define _h_P_ 6.62606896e-34
 /* remark: sigma_B = 2 pi^5 k_B^4 / (15h^3c^2) = 5.670400e-8
                    = Stefan-Boltzmann constant in W/m^2/K^4 = Kg/K^4/s^3 */
