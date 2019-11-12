@@ -2968,11 +2968,11 @@ int input_default_params(
   pba->Omega0_cdm = 0.12038/pow(pba->h,2);
 
   /** JACK NOTE Default parameters for DM-baryon scattering */
-  pba->vel_dep_n = -1;
-  pba->c_n = 1;
+  pba->vel_dep_n = 0;
+  pba->c_n = 0;
   pba->F_e = 0.76;
-  pba->sigma_0 = 1e-20;
-  pba->m_cdm = 10;
+  pba->sigma_0 = 0;
+  pba->m_cdm = 1;
   pba->m_H = 1;
 
   pba->Omega0_dcdmdr = 0.0;

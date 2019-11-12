@@ -6923,7 +6923,10 @@ int perturb_derivs(double tau,
   double alpha_rec=0.,delta_alpha_rec=0.;
   double a_rad=0., Compton_CR =0.;
   double Tb_in_K=0.;
-  double n=0., c_n=0.,F_e=0.,sigma_0=0.,m_cdm=0.,m_H=0.,rho_b=0.;
+
+  /* shortcuts for DM-baryon scattering */
+  double theta_cdm=0.,delta_cdm=0.;
+  double vel_dep_n=0., c_n=0.,F_e=0.,sigma_0=0.,m_cdm=0.,m_H=0.,rho_b=0.;
   double R_c=0.;
 
 
@@ -7031,6 +7034,8 @@ int perturb_derivs(double tau,
     }
     delta_b = y[pv->index_pt_delta_b];
     theta_b = y[pv->index_pt_theta_b];
+    delta_cdm = y[pv->index_pt_delta_cdm];
+    theta_cdm = y[pv->index_pt_theta_cdm];
     cb2 = pvecthermo[pth->index_th_cb2];
 
     /** - --> (b) perturbed recombination **/
@@ -7137,14 +7142,23 @@ int perturb_derivs(double tau,
     sigma_0 = pba->sigma_0;
     c_n = pba->c_n;
     m_cdm = pba->m_cdm;
-    m_H = _m_H_ * 3e8 * 3e8; // hydrogen mass in J
-    n = pba->vel_dep_n;
+    // m_H = _m_H_ * 3e8 * 3e8; // hydrogen mass in J
+    vel_dep_n = pba->vel_dep_n;
     // printf("%f", n);
     // R_c = a * c_n * rho_b * sigma_0 / (m_cdm + m_H) * pow((Tb_in_K / m_cdm + Tb_in_K / m_H), ((n+1)/2)) * F_e ;
     // Factor of 1/c needed for units
     // rho is in units of J/m^3 or kg/m/s^2
     // R_c in units of 1/s
-    R_c = a * c_n * rho_b * sigma_0 / (3e8 * m_cdm) * pow(Tb_in_K * _k_B_/m_H, (n+1)/2) * F_e ;
+    R_c = a * c_n * rho_b * sigma_0 / (_c_ * m_cdm) * pow(Tb_in_K * _k_B_/(_m_H_ * _c_ * _c_), (vel_dep_n+1)/2) * F_e ;
+    printf("rho_b is %f \n", rho_b);
+    printf("scale factor is %f", a);
+    printf("T_b in is %f \n", Tb_in_K);
+    printf("R is %f \n", R);
+    printf("dkappa is %f \n", pvecthermo[pth->index_th_dkappa]);
+    printf("adot/a is %f \n", a_prime_over_a);
+    printf("R_c is %f \n ", R_c/a_prime_over_a);
+    printf("Ratio of rho is %f \n", pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]);
+    // printf("paren value is %f \n", pow(Tb_in_K * _k_B_/(_m_H_ * _c_ * _c_), (vel_dep_n+1)/2));
 
 
     if (ppw->approx[ppw->index_ap_tca] == (int)tca_off) {
@@ -7157,7 +7171,7 @@ int perturb_derivs(double tau,
         + metric_euler
         + k2*cb2*(delta_b+delta_temp)
         + R*pvecthermo[pth->index_th_dkappa]*(theta_g-theta_b)
-        + pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]*R_c*(y[pv->index_pt_theta_cdm]-theta_b);
+        + pvecback[pba->index_bg_rho_cdm]/pvecback[pba->index_bg_rho_b]*R_c*(theta_cdm-theta_b);
         /* JACK NOTE: The baryon velocity has an additional term \rho_c/\rho_b*R_c(\theta_c-\theta_b) if there is DM-baryon scattering */
     }
 
@@ -7649,7 +7663,6 @@ int perturb_derivs(double tau,
 
     fprintf(stderr,"we are in vectors\n");
 
-    ssqrt3 = sqrt(1.-2.*pba->K/k2);
     cb2 = pvecthermo[pth->index_th_cb2];
 
     /** - --> baryon velocity */

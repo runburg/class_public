@@ -2,14 +2,14 @@ To use this python wrapper for class, you should first compile class with 'make 
 
 Check that the command 'python' points towards a version of python > 2.7 but < 3.0. Then, execute:
 
-> python3 setup.py build
-> python3 setup.py install --user
+> python setup.py build
+> python setup.py install --user
 
 (it's really 'user', not your own user name).
 
 You can check that these steps worked by typing
 
-> python3
+> python
 >>> from classy import Class
 
 If python does not complain, the Class module has been correctly installed in your python distribution. You can now import it and use its functions from your python codes.

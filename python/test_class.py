@@ -10,7 +10,7 @@ To run the test suite, type
 nosetests test_class.py
 If you want to extract the problematic input parameters at a later stage,
 you should type
-nose2 test_class.py 1>stdoutfile 2>stderrfile
+nosetests test_class.py 1>stdoutfile 2>stderrfile
 and then use the python script extract_errors.py on the stderrfile.
 
 When adding a new input parameter to CLASS (by modifying input.c), you
@@ -79,11 +79,11 @@ import numpy as np
 from math import log10
 import matplotlib.pyplot as plt
 import unittest
-from parameterized import parameterized
+from nose_parameterized import parameterized
 
 # To avoid testing for differences between synchronous and Newtonian gauge, set
 # this flag to False
-COMPARE_OUTPUT = True
+# COMPARE_OUTPUT = True
 
 # Dictionary of models to test the wrapper against. Each of these scenario will
 # be run against all the possible output choices (nothing, tCl, mPk, etc...),
@@ -294,11 +294,11 @@ class TestClass(unittest.TestCase):
         if self.cosmo.state:
             print('--> Class is ready')
         # Depending
-        if 'output' in list(self.scenario.keys()):
+        if 'output' in list(self.scenario.viewkeys()):
             # Positive tests of raw cls
             output = self.scenario['output']
             for elem in output.split():
-                if elem in list(cl_dict.keys()):
+                if elem in list(cl_dict.viewkeys()):
                     for cl_type in cl_dict[elem]:
                         sys.stderr.write(
                             '--> testing raw_cl for %s\n' % cl_type)
@@ -314,7 +314,7 @@ class TestClass(unittest.TestCase):
                     pk = self.cosmo.pk(0.1, 0)
                     self.assertIsNotNone(pk, "pk returned nothing")
             # Negative tests of output functions
-            if not any([elem in list(cl_dict.keys()) for elem in output.split()]):
+            if not any([elem in list(cl_dict.viewkeys()) for elem in output.split()]):
                 sys.stderr.write('--> testing absence of any Cl\n')
                 self.assertRaises(CosmoSevereError, self.cosmo.raw_cl, 100)
             if 'mPk' not in output.split():
@@ -341,7 +341,7 @@ class TestClass(unittest.TestCase):
         # If we have tensor modes, we must have one tensor observable,
         # either tCl or pCl.
         if has_tensor(self.scenario):
-            if 'output' not in list(self.scenario.keys()):
+            if 'output' not in list(self.scenario.viewkeys()):
                 should_fail = True
             else:
                 output = self.scenario['output'].split()
@@ -350,8 +350,8 @@ class TestClass(unittest.TestCase):
 
         # If we have specified lensing, we must have lCl in output,
         # otherwise lensing will not be read (which is an error).
-        if 'lensing' in list(self.scenario.keys()):
-            if 'output' not in list(self.scenario.keys()):
+        if 'lensing' in list(self.scenario.viewkeys()):
+            if 'output' not in list(self.scenario.viewkeys()):
                 should_fail = True
             else:
                 output = self.scenario['output'].split()
@@ -361,33 +361,33 @@ class TestClass(unittest.TestCase):
                     should_fail = True
 
         # If we have specified a tensor method, we must have tensors.
-        if 'tensor method' in list(self.scenario.keys()):
+        if 'tensor method' in list(self.scenario.viewkeys()):
             if not has_tensor(self.scenario):
                 should_fail = True
 
         # If we have specified non linear, we must have some form of
         # perturbations output.
-        if 'non linear' in list(self.scenario.keys()):
-            if 'output' not in list(self.scenario.keys()):
+        if 'non linear' in list(self.scenario.viewkeys()):
+            if 'output' not in list(self.scenario.viewkeys()):
                 should_fail = True
 
         # If we ask for Cl's of lensing potential, we must have scalar modes.
-        if 'output' in list(self.scenario.keys()) and 'lCl' in self.scenario['output'].split():
-            if 'modes' in list(self.scenario.keys()) and self.scenario['modes'].find('s') == -1:
+        if 'output' in list(self.scenario.viewkeys()) and 'lCl' in self.scenario['output'].split():
+            if 'modes' in list(self.scenario.viewkeys()) and self.scenario['modes'].find('s') == -1:
                 should_fail = True
 
         # If we specify initial conditions (for scalar modes), we must have
         # perturbations and scalar modes.
-        if 'ic' in list(self.scenario.keys()):
-            if 'modes' in list(self.scenario.keys()) and self.scenario['modes'].find('s') == -1:
+        if 'ic' in list(self.scenario.viewkeys()):
+            if 'modes' in list(self.scenario.viewkeys()) and self.scenario['modes'].find('s') == -1:
                 should_fail = True
-            if 'output' not in list(self.scenario.keys()):
+            if 'output' not in list(self.scenario.viewkeys()):
                 should_fail = True
 
         # If we use inflation module, we must have scalar modes,
         # tensor modes, no vector modes and we should only have adiabatic IC:
-        if 'P_k_ini type' in list(self.scenario.keys()) and self.scenario['P_k_ini type'].find('inflation') != -1:
-            if 'modes' not in list(self.scenario.keys()):
+        if 'P_k_ini type' in list(self.scenario.viewkeys()) and self.scenario['P_k_ini type'].find('inflation') != -1:
+            if 'modes' not in list(self.scenario.viewkeys()):
                 should_fail = True
             else:
                 if self.scenario['modes'].find('s') == -1:
@@ -396,7 +396,7 @@ class TestClass(unittest.TestCase):
                     should_fail = True
                 if self.scenario['modes'].find('t') == -1:
                     should_fail = True
-            if 'ic' in list(self.scenario.keys()) and self.scenario['ic'].find('i') != -1:
+            if 'ic' in list(self.scenario.viewkeys()) and self.scenario['ic'].find('i') != -1:
                 should_fail = True
 
 
@@ -424,7 +424,7 @@ class TestClass(unittest.TestCase):
                     if key[0] == key[1]:
                         # If it is a 'dd' or 'll', it is a dictionary.
                         if isinstance(value, dict):
-                            for subkey in list(value.keys()):
+                            for subkey in list(value.viewkeys()):
                                 try:
                                     np.testing.assert_allclose(
                                         value[subkey], to_test[key][subkey],
@@ -462,7 +462,7 @@ class TestClass(unittest.TestCase):
                             self.cl_faulty_plot(elem+"_"+key,
                                                 value[2:], to_test[key][2:])
 
-        if 'output' in list(self.scenario.keys()):
+        if 'output' in list(self.scenario.viewkeys()):
             if self.scenario['output'].find('mPk') != -1:
                 sys.stderr.write('--> testing equality of Pk')
                 k = np.logspace(
@@ -536,7 +536,7 @@ class TestClass(unittest.TestCase):
 
 
 def has_tensor(input_dict):
-    if 'modes' in list(input_dict.keys()):
+    if 'modes' in list(input_dict.viewkeys()):
         if input_dict['modes'].find('t') != -1:
             return True
     else:
